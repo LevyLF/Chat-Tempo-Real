@@ -36,7 +36,7 @@ Socket.io
 
 HTML / CSS / JavaScript para o cliente  
 
-🧩 Possíveis Extensões
+🧩 Possíveis Extensões  
 Autenticação de usuários (login / registro)
 
 Salvar histórico de mensagens em banco de dados
