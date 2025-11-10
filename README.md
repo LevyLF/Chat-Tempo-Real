@@ -11,19 +11,20 @@ Este projeto implementa um chat em tempo real usando Node.js para o backend e So
 
 ## 🚀 Como Rodar Localmente  
 1. Clone este repositório:  
-   ```bash
+   ```
    git clone https://github.com/LevyLF/Chat-em-tempo-real-.git
    cd Chat-em-tempo-real-
+   ```
 Instale as dependências:
-
-bash
-Copiar código
-npm install
+   ```
+   npm install
+   ```
 Inicie o servidor:
 
-bash
-Copiar código
+```
 node server.js
+```
+
 Acesse no navegador: http://localhost:3000
 
 Divirta-se 
