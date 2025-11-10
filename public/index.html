@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Tempo Real</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #1e1e2f;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 90%;
+      max-width: 600px;
+      height: 80vh;
+      background: #2b2b3d;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #3e3e55;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #444;
+    }
+
+    .chat-header h1 {
+      font-size: 1.1em;
+      margin: 0;
+    }
+
+    .settings {
+      position: relative;
+    }
+
+    .settings button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.3em;
+      cursor: pointer;
+    }
+
+    .settings-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 30px;
+      background: #3e3e55;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .settings-menu button {
+      display: block;
+      background: none;
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .settings-menu button:hover {
+      background: #4c5aff;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #242438;
+    }
+
+    .message {
+      display: inline-block;
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      word-wrap: break-word;
+      line-height: 1.4em;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .message .username {
+      display: block;
+      font-size: 0.9em;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .system {
+      color: #aaa;
+      text-align: center;
+      font-style: italic;
+      font-size: 0.9em;
+    }
+
+    .my-message { background: #4c5aff; align-self: flex-end; color: white; }
+    .other-message { background: #3a3a50; align-self: flex-start; }
+
+    .chat-footer {
+      display: flex;
+      padding: 10px;
+      background: #3e3e55;
+      border-top: 1px solid #444;
+    }
+
+    .chat-footer input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      margin-right: 10px;
+      outline: none;
+      background: #2a2a3a;
+      color: #fff;
+    }
+
+    .chat-footer button {
+      padding: 10px 16px;
+      background: #4c5aff;
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .username-setup {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .username-setup input {
+      width: 80%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #2a2a3a;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .username-setup button {
+      padding: 10px 16px;
+      background: #4c5aff;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeToast 4s forwards;
+      font-size: 0.95em;
+      z-index: 1000;
+    }
+
+    @keyframes fadeToast {
+      0% { opacity: 0; transform: translateY(20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(20px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>💬 Chat 💬</h1>
+      <div class="settings">
+        <button id="settingsBtn">🖥️</button>
+        <div class="settings-menu" id="settingsMenu">
+          <button id="changeNameBtn">Trocar nome</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="username-setup" id="usernameSetup">
+      <input id="usernameInput" type="text" placeholder="Escolha um nome..." />
+      <button id="setUsernameBtn">Entrar</button>
+    </div>
+
+    <div class="messages" id="messages" style="display:none;"></div>
+
+    <div class="chat-footer" id="chatFooter" style="display:none;">
+      <input id="messageInput" type="text" placeholder="Digite sua mensagem..." />
+      <button id="sendButton">Enviar</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const usernameSetup = document.getElementById('usernameSetup');
+    const usernameInput = document.getElementById('usernameInput');
+    const setUsernameBtn = document.getElementById('setUsernameBtn');
+    const messagesDiv = document.getElementById('messages');
+    const chatFooter = document.getElementById('chatFooter');
+    const sendButton = document.getElementById('sendButton');
+    const messageInput = document.getElementById('messageInput');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsMenu = document.getElementById('settingsMenu');
+    const changeNameBtn = document.getElementById('changeNameBtn');
+
+    let username = localStorage.getItem('username');
+    let color = localStorage.getItem('color');
+
+    settingsBtn.addEventListener('click', () => {
+      settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    function showToast(message, color = '#333') {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      toast.style.background = color;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    setUsernameBtn.addEventListener('click', () => {
+      const name = usernameInput.value.trim();
+      if (name) {
+        socket.emit('set username', name, (res) => {
+          if (res.success) {
+            username = name;
+            color = res.color;
+            localStorage.setItem('username', name);
+            localStorage.setItem('color', color);
+            mostrarChat();
+            showToast('Bem-vindo ao chat!');
+          } else {
+            showToast(res.message, '#b33939');
+          }
+        });
+      }
+    });
+
+    function mostrarChat() {
+      usernameSetup.style.display = 'none';
+      messagesDiv.style.display = 'flex';
+      chatFooter.style.display = 'flex';
+    }
+
+    if (username) {
+      socket.emit('set username', username, (res) => {
+        if (res.success) {
+          color = res.color;
+          localStorage.setItem('color', color);
+          mostrarChat();
+        } else {
+          localStorage.removeItem('username');
+          showToast('Seu nome estava duplicado, escolha outro.', '#b33939');
+        }
+      });
+    }
+
+    socket.on('chat message', (msg) => {
+      const messageEl = document.createElement('div');
+      if (msg.system) {
+        messageEl.classList.add('system');
+        messageEl.textContent = msg.text;
+      } else {
+        messageEl.classList.add('message');
+        messageEl.classList.add(msg.username === username ? 'my-message' : 'other-message');
+        const nameEl = document.createElement('span');
+        nameEl.classList.add('username');
+        nameEl.textContent = msg.username;
+        nameEl.style.color = msg.color;
+        messageEl.appendChild(nameEl);
+        messageEl.append(msg.text);
+      }
+      messagesDiv.appendChild(messageEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    sendButton.addEventListener('click', () => {
+      const msg = messageInput.value.trim();
+      if (msg) {
+        socket.emit('chat message', msg);
+        messageInput.value = '';
+      }
+    });
+
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendButton.click();
+    });
+
+    changeNameBtn.addEventListener('click', () => {
+      const newName = prompt('Digite seu novo nome:');
+      if (newName && newName !== username) {
+        socket.emit('change username', newName, (res) => {
+          if (res.success) {
+            localStorage.setItem('username', newName);
+            username = newName;
+            showToast('Nome alterado com sucesso!', '#44bd32');
+          } else {
+            showToast(res.message, '#b33939');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
